@@ -1,0 +1,132 @@
+<!DOCTYPE html> 
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>طلب خدمة</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: #f2f2f2;
+    }
+
+    h1 {
+      font-size: 2em;
+    }
+
+    select, textarea {
+      width: 100%;
+      padding: 20px;
+      font-size: 2em;
+      margin-bottom: 30px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      height: 150px;
+      resize: none;
+    }
+
+    button {
+      width: 100%;
+      height: 25vh;
+      font-size: 10em;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: gray;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>إرسال طلباً إلى موظف الخدمة</h1>
+
+  <select id="location">
+    <option value="">-- اختر المكان --</option>
+    <option>غرفة الدكتور</option>
+    <option>غرفة الدكتورة</option>
+    <option>القاعة الكبرى</option>
+    <option>قاعة الاجتماعات</option>
+    <option>الاستعلامات</option>
+    <option>مكتب الحملة</option>
+    <option>مركز مستقبل نينوى</option>
+    <option>قاعة التدريب</option>
+    <option>النادي العلمي</option>
+    <option>نقابة المبرمجين</option>
+    <option>غرفة المداولة</option>
+    <option>الغرفة الدولية (منظمات)</option>
+    <option>غرفة الاعلام</option>
+    <option>الجناح</option>
+    <option>الطابق الثاني</option>
+    <option>الحديقة</option>
+  </select>
+
+  <textarea id="details" placeholder="تفاصيل الطلب (اختياري)"></textarea>
+
+  <button id="sendBtn">نــداء</button>
+
+  <div class="status" id="status"></div>
+
+  <script>
+    const sendBtn = document.getElementById('sendBtn');
+    const locationSelect = document.getElementById('location');
+    const detailsInput = document.getElementById('details');
+    const statusDiv = document.getElementById('status');
+
+    sendBtn.onclick = async () => {
+      const location = locationSelect.value.trim();
+      const details = detailsInput.value.trim();
+
+      if (!location) {
+        alert('الرجاء اختيار المكان قبل الإرسال.');
+        return;
+      }
+
+      sendBtn.disabled = true;
+      statusDiv.textContent = 'جاري الإرسال...';
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('ar-IQ');
+
+      const message = `📍 المكان: ${location}\n🕒 الوقت: ${timeStr}\n📝 تفاصيل الطلب: ${details || 'لا توجد تفاصيل'}`;
+
+      const botToken = '8014365512:AAFV1nIDBPzwJwItUrZudEHIkz9cMgyJGP4';
+      const chatId = '-1002533366963';
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message
+          })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          statusDiv.textContent = '✅ تم إرسال الطلب بنجاح.';
+        } else {
+          statusDiv.textContent = '❌ فشل الإرسال.';
+        }
+      } catch (err) {
+        statusDiv.textContent = '❌ حدث خطأ أثناء الإرسال.';
+      } finally {
+        sendBtn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
